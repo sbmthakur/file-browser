@@ -44,7 +44,6 @@ func get_files(file_path string) string {
 	files := make([]FileDetails, 0)
 
 	for _, entry := range entries {
-		//fmt.Println(entry.IsDir())
 
 		t, s := "", 0
 
@@ -59,10 +58,9 @@ func get_files(file_path string) string {
 		files = append(files, new_file)
 	}
 
-	r := Resp{FileDetails: FileDetails{Name: "home", Type: "dir", Size: 0}, Contents: files}
+	r := Resp{FileDetails: FileDetails{Name: "/", Type: "dir", Size: 0}, Contents: files}
 
 	data, _ := json.Marshal(r)
-	//fmt.Println(string(data))
 	return string(data)
 }
 
@@ -73,6 +71,10 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 
 	// Routes
 	e.Static("/static", "assets")
