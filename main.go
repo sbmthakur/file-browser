@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -21,7 +22,7 @@ type Resp struct {
 	Contents []FileDetails `json:"contents"`
 }
 
-func get_files(file_path string) string {
+func get_files(file_path string) (string, error) {
 
 	dir := "/home/shubham/workspace/file-browser/storage/" + file_path
 	fmt.Println(dir)
@@ -29,16 +30,14 @@ func get_files(file_path string) string {
 	// Open the directory.
 	f, err := os.Open(dir)
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		return "", err
 	}
 	defer f.Close()
 
 	// Read the directory entries.
 	entries, err := f.Readdir(-1)
 	if err != nil {
-		fmt.Println(err)
-		return ""
+		return "", err
 	}
 
 	files := make([]FileDetails, 0)
@@ -61,7 +60,7 @@ func get_files(file_path string) string {
 	r := Resp{FileDetails: FileDetails{Name: "/", Type: "dir", Size: 0}, Contents: files}
 
 	data, _ := json.Marshal(r)
-	return string(data)
+	return string(data), nil
 }
 
 func main() {
@@ -77,7 +76,13 @@ func main() {
 	}))
 
 	// Routes
-	e.Static("/static", "assets")
+	e.Static("/static", "web-app/build/static")
+	//e.Use(middleware.Static("web-app/build"))
+
+	e.GET("/:dirPath", func(c echo.Context) error {
+		return c.File("web-app/build/index.html")
+	})
+
 	e.GET("/files", file_handler)
 
 	// Start server
@@ -86,11 +91,19 @@ func main() {
 
 func file_handler(c echo.Context) error {
 	file_path := c.QueryParam("path")
-	fmt.Println(file_path)
-	return c.String(http.StatusOK, get_files(file_path))
+	response, err := get_files(file_path)
+
+	if err == nil {
+		return c.String(http.StatusOK, response)
+	}
+
+	if strings.Contains(err.Error(), "no such file") {
+		return c.String(http.StatusNotFound, "Not Found")
+	}
+
+	return c.String(http.StatusInternalServerError, "Something failed")
 }
 
-// Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, get_files(""))
+func redirect_root(c echo.Context) error {
+	return c.Redirect(http.StatusMovedPermanently, "/folders")
 }
