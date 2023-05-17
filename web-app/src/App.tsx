@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import './App.css';
 
 interface FilesDetails {
@@ -21,9 +21,14 @@ function App() {
     contents: []
   }
 
-  const { pathname } = useLocation()
+  const { dirPath } = useParams()
 
-  const initialPath = pathname === '/' ? '/' : pathname.substring(1, pathname.length)
+  //let { pathname } = useLocation()
+  //alert(pathname)
+  //pathname = pathname.replace("/folders", '')
+  //const initialPath = pathname === '/' ? '/' : pathname.substring(1, pathname.length)
+  alert(dirPath)
+  const initialPath = dirPath ? dirPath : '/'
 
   const [fileData, setFileData] = useState<Resp>(fileStateData)
   const [path, setPath] = useState(initialPath)
