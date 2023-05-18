@@ -27,7 +27,6 @@ function App() {
   //alert(pathname)
   //pathname = pathname.replace("/folders", '')
   //const initialPath = pathname === '/' ? '/' : pathname.substring(1, pathname.length)
-  alert(dirPath)
   const initialPath = dirPath ? dirPath : '/'
 
   const [fileData, setFileData] = useState<Resp>(fileStateData)
@@ -46,17 +45,18 @@ function App() {
     <div className="App">
       <header className="App-header">
         <ul id="Bread-crumb" style={{ listStyleType: 'none' }}>
-          <li>Home</li>
-          {
-            path.split('/').map(item => {
-              if(item) {
-                return <li> {'>'} {item}</li>
-              } else {
-                return null
-              }
-              
-            })
-          }
+          <li><a href={document.location.origin +'/'}>Home</a></li>
+          {(() => {
+            if (path === '/') {
+              return 
+            }
+            const paths = path.split('/')
+            const c = []
+            for(let i = 0; i < paths.length; i++) {
+              c.push(<li>{'> '}<a href={document.location.origin +'/' + paths.slice(0, i + 1).join('/')}>{paths[i]}</a></li>) 
+            }
+            return c
+          })()}
         </ul>
         <table>
           <th>Name</th>
