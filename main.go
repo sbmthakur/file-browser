@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +16,7 @@ import (
 type FileDetails struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
-	Size int    `json:"size"`
+	Size string `json:"size"`
 }
 
 type Resp struct {
@@ -44,23 +46,37 @@ func get_files(file_path string) (string, error) {
 
 	for _, entry := range entries {
 
-		t, s := "", 0
+		t, s := "", ""
 
 		if entry.IsDir() {
 			t = "dir"
 		} else {
 			t = "file"
-			s = int(entry.Size())
+			s = convert_unit(entry.Size())
 		}
 
 		new_file := FileDetails{Name: entry.Name(), Type: t, Size: s}
 		files = append(files, new_file)
 	}
 
-	r := Resp{FileDetails: FileDetails{Name: "/", Type: "dir", Size: 0}, Contents: files}
+	r := Resp{FileDetails: FileDetails{Name: "/", Type: "dir", Size: ""}, Contents: files}
 
 	data, _ := json.Marshal(r)
 	return string(data), nil
+}
+
+func convert_unit(size int64) string {
+	s := [3]string{"Bytes", "KB", "MB"}
+	i := 0
+	ss := float64(size)
+
+	for ss > 1024 {
+		ss = ss / 1024
+		i++
+	}
+
+	ss = math.Ceil(ss)
+	return strconv.FormatFloat(ss, 'f', -1, 64) + " " + s[i]
 }
 
 func main() {

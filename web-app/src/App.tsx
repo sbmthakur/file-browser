@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import './App.css';
 
 interface FilesDetails {
@@ -13,7 +13,6 @@ interface Resp extends FilesDetails {
 }
 
 function App() {
-  //const [fileData, setFileData] = useState({ name: 'some' })
   const fileStateData = {
     name: '',
     size: 0,
@@ -22,11 +21,6 @@ function App() {
   }
 
   const { dirPath } = useParams()
-
-  //let { pathname } = useLocation()
-  //alert(pathname)
-  //pathname = pathname.replace("/folders", '')
-  //const initialPath = pathname === '/' ? '/' : pathname.substring(1, pathname.length)
   const initialPath = dirPath ? dirPath : '/'
 
   const [fileData, setFileData] = useState<Resp>(fileStateData)
@@ -62,14 +56,22 @@ function App() {
           <th>Name</th>
           <th>Size</th>
           { 
-          fileData.contents.map(o => {
-            return <tr><td><span className="File-name" onClick={() => { 
-              if (o.type === "dir") {
-                const newName = path === '/' ? o.name : path + '/' + o.name
-                setPath(newName)
-              }
-            }}>{o.name}</span></td><td>{o.type === "dir" ? 0: o.size}</td></tr>
-          })
+            fileData.contents.map(o => {
+              return <tr><td>
+                {
+                  (() => {
+                    const fileExtension = o.name.substring(o.name.lastIndexOf('.') + 1) 
+                    const className = "file-icon fiv-viv fiv-icon-" + fileExtension
+                    return <span className={className}></span>
+                  })()
+                }
+                <span className="File-name" onClick={() => {
+                  if (o.type === "dir") {
+                    const newName = path === '/' ? o.name : path + '/' + o.name
+                    setPath(newName)
+                  }
+                }}>{o.name}</span></td><td>{o.type === "dir" ? '-' : o.size}</td></tr>
+            })
           }
         </table>
       </header>

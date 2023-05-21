@@ -62,3 +62,7 @@ td, td > span {
   text-align: center; 
   font-size:medium;
 }
+
+.file-icon {
+  margin-right: 2em;
+}
